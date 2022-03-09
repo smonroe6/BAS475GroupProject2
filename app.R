@@ -12,6 +12,8 @@ library(shinydashboard)
 library(fontawesome)
 library(quantmod)
 
+
+
 stocktab <-  menuItem("Stock Plot", tabName = "stock")
 changetab <- menuItem("Change over Time", tabName = "change")
 searchtab <-  menuItem("Search for your Stock", tabName = "search" )
@@ -24,7 +26,10 @@ sidebar <- dashboardSidebar(sidebarMenu(
   searchtab,
   earntab))
 
-body <- dashboardBody(tabItems(tabItem(tabName = "stock",h2("Select a stock")),
+body <- dashboardBody(tabItems(tabItem(tabName = "stock",h2("Select a stock"),
+                                       dateInput("start_date", "Select Start Date"),
+                                       dateInput("end_date", "Select End Date"),
+                                       plotlyOutput("stock_plot")),
                                tabItem(tabName = "change",h2("See how a stock changes over time")),
                                tabItem(tabName = "search",h2("Search for your stock")),
                                tabItem(tabName = "earn",h2("Current Earnings of Stocks"))))
@@ -38,8 +43,24 @@ ui <- fluidPage(
 
 
 server <- function(input, output) {
- #output$stock()
+  
+  output$stock_plot <- renderPlotly({
+    start <- input$start_date
+    end <- input$end_date
    
+    autoplot(aus_accommodation)
+    # getSymbols("PEP", src = "yahoo", from = start, to = end)
+    # ggplotly(ggplot(mapping = aes(x = Index, y = Value)) +
+    #            geom_line(data = fortify(Cl("PEP"), melt = TRUE), aes(color = "PEP")) +
+    #            geom_line(data = fortify(Cl("MSFT"), melt = TRUE), aes(color = "MSFT")) +
+    #            geom_line(data = fortify(Cl("YUMC"), melt = TRUE), aes(color = "YUMC")) +
+    #            geom_line(data = fortify(Cl("YUM"), melt = TRUE), aes(color = "YUM")) +
+    #            xlab("Index") + ylab("Closing Price"))
+  })
+ 
+  
+  #output$stock()
+  
 }
 
 # Run the application 
