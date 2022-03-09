@@ -17,7 +17,7 @@ library(ggplot2)
 library(plotly)
 library(ggpubr)
 
-CHOICES <- stockSymbols()
+SYMBOL <- stockSymbols()
 
 
 library(shiny)
@@ -37,7 +37,7 @@ sidebar <- dashboardSidebar(sidebarMenu(
 body <- dashboardBody(tabItems(tabItem(tabName = "stock",h2("Select a stock"),
                                        dateInput("start_date", "Select Start Date", value = "2000-01-01"),
                                        dateInput("end_date", "Select End Date"),
-                                       selectInput("tick","Choose One Stock Ticker", choices = names(table(CHOICES$Symbol))),
+                                       selectInput("sname","Choose One Stock", choices = names(table(SYMBOL$Name))),
                                        submitButton(),
                                        plotlyOutput("stock_plot")),
                                tabItem(tabName = "change",h2("See how a stock changes over time")),
@@ -57,7 +57,8 @@ server <- function(input, output) {
   output$stock_plot <- renderPlotly({
     start <- input$start_date
     end <- input$end_date
-    STOCK <- getSymbols(input$tick, src = "yahoo", from = start, to = end, auto.assign = FALSE)
+    TICK <- SYMBOL$Symbol[which(SYMBOL$Name == input$sname)]
+    STOCK <- getSymbols(TICK, src = "yahoo", from = start, to = end, auto.assign = FALSE)
     autoplot(STOCK[,4])
     
     
