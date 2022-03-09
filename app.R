@@ -38,7 +38,7 @@ ui <- fluidPage(
 
 
 server <- function(input, output) {
- output$stock()
+ #output$stock()
    
 }
 
