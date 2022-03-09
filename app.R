@@ -11,7 +11,11 @@ library(shiny)
 library(shinydashboard)
 library(fontawesome)
 library(quantmod)
-
+library(dplyr)
+library(fpp3)
+library(ggplot2)
+library(plotly)
+library(ggpubr)
 
 
 stocktab <-  menuItem("Stock Plot", tabName = "stock")
