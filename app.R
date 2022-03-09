@@ -7,7 +7,7 @@
 #    http://shiny.rstudio.com/
 #
 
-library(shiny)
+
 library(shinydashboard)
 library(fontawesome)
 library(quantmod)
@@ -17,6 +17,10 @@ library(ggplot2)
 library(plotly)
 library(ggpubr)
 
+CHOICES <- stockSymbols()
+
+
+library(shiny)
 
 stocktab <-  menuItem("Stock Plot", tabName = "stock")
 changetab <- menuItem("Change over Time", tabName = "change")
@@ -33,7 +37,7 @@ sidebar <- dashboardSidebar(sidebarMenu(
 body <- dashboardBody(tabItems(tabItem(tabName = "stock",h2("Select a stock"),
                                        dateInput("start_date", "Select Start Date", value = "2000-01-01"),
                                        dateInput("end_date", "Select End Date"),
-                                       textInput("tick","Choose One Stock Ticker",value = "PEP"),
+                                       selectInput("tick","Choose One Stock Ticker", choices = names(table(CHOICES$Symbol))),
                                        submitButton(),
                                        plotlyOutput("stock_plot")),
                                tabItem(tabName = "change",h2("See how a stock changes over time")),
