@@ -8,42 +8,40 @@
 #
 
 library(shiny)
+library(shinydashboard)
+library(fontawesome)
+library(quantmod)
 
-# Define UI for application that draws a histogram
+stocktab <-  menuItem("Stock Plot", tabName = "stock")
+changetab <- menuItem("Change over Time", tabName = "change")
+searchtab <-  menuItem("Search for your Stock", tabName = "search" )
+earntab <- menuItem("Current Earnings", tabName = "earn")
+
+
+sidebar <- dashboardSidebar(sidebarMenu(
+  stocktab,
+  changetab,
+  searchtab,
+  earntab))
+
+body <- dashboardBody(tabItems(tabItem(tabName = "stock",h2("Select a stock")),
+                               tabItem(tabName = "change",h2("See how a stock changes over time")),
+                               tabItem(tabName = "search",h2("Search for your stock")),
+                               tabItem(tabName = "earn",h2("Current Earnings of Stocks"))))
+
 ui <- fluidPage(
+  dashboardPage(
+    dashboardHeader(title = "Stocks App Project 2"),
+   sidebar,
+   body
+))
 
-    # Application title
-    titlePanel("Old Faithful Geyser Data"),
 
-    # Sidebar with a slider input for number of bins 
-    sidebarLayout(
-        sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 50,
-                        value = 30)
-        ),
-
-        # Show a plot of the generated distribution
-        mainPanel(
-           plotOutput("distPlot")
-        )
-    )
-)
-
-# Define server logic required to draw a histogram
 server <- function(input, output) {
-
-    output$distPlot <- renderPlot({
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white')
-    })
+ output$stock()
+   
 }
 
 # Run the application 
 shinyApp(ui = ui, server = server)
+
