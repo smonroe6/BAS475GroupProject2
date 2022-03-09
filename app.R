@@ -34,13 +34,20 @@ sidebar <- dashboardSidebar(sidebarMenu(
   searchtab,
   earntab))
 
-body <- dashboardBody(tabItems(tabItem(tabName = "stock",h2("Select a stock"),
+body <- dashboardBody(tabItems(tabItem(tabName = "stock",h2("Select a stock.
+                                                            Will show the period you select or the time the stock was traded."),
                                        dateInput("start_date", "Select Start Date", value = "2000-01-01"),
                                        dateInput("end_date", "Select End Date"),
-                                       selectInput("sname","Choose One Stock", choices = names(table(SYMBOL$Name))),
+                                       selectInput("sname","Choose One Stock", choices = names(table(SYMBOL$Name)), selected = names(table(SYMBOL$Name))[789]),
                                        submitButton(),
                                        plotlyOutput("stock_plot")),
-                               tabItem(tabName = "change",h2("See how a stock changes over time")),
+                               tabItem(tabName = "change",h2("See how much money you would have based on a past investment"),
+                                       dateInput("start_invest", "Select Start Date", value = "2000-01-01"),
+                                       dateInput("end_invest", "Select End Date"),
+                                       selectInput("stockname","Choose One Stock", choices = names(table(SYMBOL$Name)), selected = names(table(SYMBOL$Name))[789]),
+                                       selectInput("initial","Choose Amount", choices = 1:1000),
+                                       submitButton(),
+                                       verbatimTextOutput("money")),
                                tabItem(tabName = "search",h2("Search for your stock")),
                                tabItem(tabName = "earn",h2("Current Earnings of Stocks"))))
 
@@ -58,18 +65,34 @@ server <- function(input, output) {
     start <- input$start_date
     end <- input$end_date
     TICK <- SYMBOL$Symbol[which(SYMBOL$Name == input$sname)]
-    STOCK <- getSymbols(TICK, src = "yahoo", from = start, to = end, auto.assign = FALSE)
-    autoplot(STOCK[,4])
+    STOCK <- getSymbols(TICK, src = "yahoo", start = start, end = end, auto.assign = FALSE)
+    autoplot(STOCK[,4]) + labs(title= paste(SYMBOL$Symbol[which(SYMBOL$Name == input$sname)], 
+                                            "Stock Price"), y = "Price in USD", x = "Date")
     
     
     #chartSeries(STOCK)
 
   })
- 
+
+  output$money <- renderPrint({
+    start_invest <- input$start_invest
+    end_invest <- input$end_invest
+    TICK <- SYMBOL$Symbol[which(SYMBOL$Name == input$stockname)]
+    STOCK <- getSymbols(TICK, src = "yahoo", start = start_invest, end = end_invest, auto.assign = FALSE)
+    start_price <- STOCK[1,4]
+    start_price <- as.numeric(start_price)
+    end_price <- tail(STOCK, 1)[,4]
+    end_price <- as.numeric(end_price)
+    change <- end_price - start_price
+    percent_change <- change/start_price
+    end_money <- as.numeric(input$initial) * (1+percent_change)
+    end_money
+  })
   
   #output$stock()
   
 }
+
 
 # Run the application 
 shinyApp(ui = ui, server = server)
