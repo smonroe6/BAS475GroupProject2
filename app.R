@@ -65,7 +65,7 @@ server <- function(input, output) {
     start <- input$start_date
     end <- input$end_date
     TICK <- SYMBOL$Symbol[which(SYMBOL$Name == input$sname)]
-    STOCK <- getSymbols(TICK, src = "yahoo", start = start, end = end, auto.assign = FALSE)
+    STOCK <- getSymbols(TICK, src = "yahoo", from = start, to = end, auto.assign = FALSE)
     autoplot(STOCK[,4]) + labs(title= paste(SYMBOL$Symbol[which(SYMBOL$Name == input$sname)], 
                                             "Stock Price"), y = "Price in USD", x = "Date")
     
@@ -78,7 +78,7 @@ server <- function(input, output) {
     start_invest <- input$start_invest
     end_invest <- input$end_invest
     TICK <- SYMBOL$Symbol[which(SYMBOL$Name == input$stockname)]
-    STOCK <- getSymbols(TICK, src = "yahoo", start = start_invest, end = end_invest, auto.assign = FALSE)
+    STOCK <- getSymbols(TICK, src = "yahoo", from = start_invest, to = end_invest, auto.assign = FALSE)
     start_price <- STOCK[1,4]
     start_price <- as.numeric(start_price)
     end_price <- tail(STOCK, 1)[,4]
