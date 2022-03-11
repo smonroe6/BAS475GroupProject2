@@ -52,7 +52,14 @@ body <- dashboardBody(tabItems(tabItem(tabName = "stock",h2("Select a stock.
                                        selectInput("initial","Choose Amount", choices = 1:1000),
                                        submitButton(),
                                        textOutput("money")),
-                               tabItem(tabName = "MultiplePlot",h2("Select a date range and multiple stocks to see them graphed.")),
+                               tabItem(tabName = "MultiplePlot",h2("Select a date range and multiple stocks to see them graphed."),
+  dateInput("start_invest_multi2", "Select Start Date", value = "2000-01-01"),
+  dateInput("end_invest_multi2", "Select End Date"),
+  selectInput("stocknamecomp1","Choose Stock 1", choices = names(table(SYMBOL$Name)), selected = names(table(SYMBOL$Name))[789]),
+  submitButton(),
+   plotlyOutput("stonk"),
+  selectInput("stocknamecomp2","Choose Stock 2", choices = names(table(SYMBOL$Name)), selected = names(table(SYMBOL$Name))[789]),
+  plotlyOutput("stonk2")),
                                tabItem(tabName = "earn",h2("Current Earnings of Stocks"),
                                        dateInput("start_invest_multi", "Select Start Date", value = "2000-01-01"),
                                        dateInput("end_invest_multi", "Select End Date"),
@@ -122,6 +129,28 @@ server <- function(input, output) {
     total <- sum(end_money + end_money2)
     paste("Current Earnings of Stock is ",dollar(total))
   })
+   output$stonk <- renderPlotly({
+  start_invest <- input$start_invest_multi2
+  end_invest <- input$end_invest_multi2
+  TICKS1 <- SYMBOL$Symbol[which(SYMBOL$Name == input$stocknamecomp1)]
+  STOCKS1 <- getSymbols(TICKS1, src = "yahoo", from = start_invest, to = end_invest, auto.assign = FALSE)
+  autoplot(STOCKS1[,4]) + labs(title= paste(SYMBOL$Symbol[which(SYMBOL$Name == input$stocknamecomp1)], 
+                                          "Stock Price"), y = "Price in USD", x = "Date")
+  
+
+  })
+  output$stonk2 <- renderPlotly({
+  start_invest <- input$start_invest_multi2
+  end_invest <- input$end_invest_multi2
+  TICKS2 <- SYMBOL$Symbol[which(SYMBOL$Name == input$stocknamecomp2)]
+  STOCKS2 <- getSymbols(TICKS2, src = "yahoo", from = start_invest, to = end_invest, auto.assign = FALSE)
+  autoplot(STOCKS2[,4]) + labs(title= paste(SYMBOL$Symbol[which(SYMBOL$Name == input$stocknamecomp2)], 
+                                           "Stock Price"), y = "Price in USD", x = "Date")
+  })
+
+  
+  
+  
 }
 
 
