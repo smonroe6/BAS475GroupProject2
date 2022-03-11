@@ -7,7 +7,6 @@
 #    http://shiny.rstudio.com/
 #
 
-
 library(shinydashboard)
 library(fontawesome)
 library(quantmod)
@@ -18,6 +17,7 @@ library(ggeasy)
 library(plotly)
 library(ggpubr)
 library(tidyquant)
+library(TTR)
 
 SYMBOL <- stockSymbols()
 
@@ -52,14 +52,22 @@ body <- dashboardBody(tabItems(tabItem(tabName = "stock",h2("Select a stock.
                                        submitButton(),
                                        verbatimTextOutput("money")),
                                tabItem(tabName = "MultiplePlot",h2("Select a date range and multiple stocks to see them graphed.")),
-                               tabItem(tabName = "earn",h2("Current Earnings of Stocks"))))
+                               tabItem(tabName = "earn",h2("Current Earnings of Stocks"),
+                                       dateInput("start_invest", "Select Start Date", value = "2000-01-01"),
+                                       dateInput("end_invest", "Select End Date"),
+                                       selectInput("stockname","Choose One Stock", choices = names(table(SYMBOL$Name)), selected = names(table(SYMBOL$Name))[789]),
+                                       selectInput("stockname2","Choose Another Stock", choices = names(table(SYMBOL$Name)), selected = names(table(SYMBOL$Name))[789]),
+                                       selectInput("initial","Choose Amount of Stocks", choices = 1:1000),
+                                       selectInput("initial2","Choose Amount of Stocks", choices = 1:1000),
+                                       submitButton(),
+                                       verbatimTextOutput("money2"))))
 
 ui <- fluidPage(
   dashboardPage(
     dashboardHeader(title = "Stocks App Project 2"),
-   sidebar,
-   body
-))
+    sidebar,
+    body
+  ))
 
 
 server <- function(input, output) {
@@ -73,7 +81,7 @@ server <- function(input, output) {
                                             "Stock Price"), y = "Price in USD", x = "Date")
     
   })
-
+  
   output$money <- renderPrint({
     start_invest <- input$start_invest
     end_invest <- input$end_invest
@@ -89,9 +97,32 @@ server <- function(input, output) {
     end_money
   })
   
+  output$money2 <- renderPrint({
+    start_invest <- input$start_invest
+    end_invest <- input$end_invest
+    TICK <- SYMBOL$Symbol[which(SYMBOL$Name == input$stockname)]
+    TICK2 <- SYMBOL$Symbol[which(SYMBOL$Name == input$stockname2)]
+    STOCK <- getSymbols(TICK, src = "yahoo", from = start_invest, to = end_invest, auto.assign = FALSE)
+    STOCK2 <- getSymbols(TICK2, src = "yahoo", from = start_invest, to = end_invest, auto.assign = FALSE)
+    start_price <- STOCK[1,4]
+    start_price2 <- STOCK2[1,4]
+    start_price <- as.numeric(start_price)
+    start_price2 <- as.numeric(start_price2)
+    end_price <- tail(STOCK, 1)[,4]
+    end_price2 <- tail(STOCK2, 1)[,4]
+    end_price <- as.numeric(end_price)
+    end_price2 <- as.numeric(end_price2)
+    change <- end_price - start_price
+    change2 <- end_price2 - start_price2
+    percent_change <- change/start_price
+    percent_change2 <- change2/start_price2
+    end_money <- as.numeric(input$initial) * (1+percent_change)
+    end_money2 <- as.numeric(input$initial2) * (1+percent_change2)
+    total <- sum(end_money + end_money2)
+    total
+  })
 }
 
 
 # Run the application 
 shinyApp(ui = ui, server = server)
-
