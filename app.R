@@ -14,17 +14,20 @@ library(quantmod)
 library(dplyr)
 library(fpp3)
 library(ggplot2)
+library(ggeasy)
 library(plotly)
 library(ggpubr)
+library(tidyquant)
 
 SYMBOL <- stockSymbols()
 
 
 library(shiny)
+library(shinyWidgets)
 
 stocktab <-  menuItem("Stock Plot", tabName = "stock")
 changetab <- menuItem("Change over Time", tabName = "change")
-searchtab <-  menuItem("Search for your Stock", tabName = "search" )
+searchtab <-  menuItem("Plot Multiple Stocks", tabName = "MultiplePlot" )
 earntab <- menuItem("Current Earnings", tabName = "earn")
 
 
@@ -48,7 +51,7 @@ body <- dashboardBody(tabItems(tabItem(tabName = "stock",h2("Select a stock.
                                        selectInput("initial","Choose Amount", choices = 1:1000),
                                        submitButton(),
                                        verbatimTextOutput("money")),
-                               tabItem(tabName = "search",h2("Search for your stock")),
+                               tabItem(tabName = "MultiplePlot",h2("Select a date range and multiple stocks to see them graphed.")),
                                tabItem(tabName = "earn",h2("Current Earnings of Stocks"))))
 
 ui <- fluidPage(
@@ -69,9 +72,6 @@ server <- function(input, output) {
     autoplot(STOCK[,4]) + labs(title= paste(SYMBOL$Symbol[which(SYMBOL$Name == input$sname)], 
                                             "Stock Price"), y = "Price in USD", x = "Date")
     
-    
-    #chartSeries(STOCK)
-
   })
 
   output$money <- renderPrint({
@@ -88,8 +88,6 @@ server <- function(input, output) {
     end_money <- as.numeric(input$initial) * (1+percent_change)
     end_money
   })
-  
-  #output$stock()
   
 }
 
