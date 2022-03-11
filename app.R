@@ -53,12 +53,12 @@ body <- dashboardBody(tabItems(tabItem(tabName = "stock",h2("Select a stock.
                                        verbatimTextOutput("money")),
                                tabItem(tabName = "MultiplePlot",h2("Select a date range and multiple stocks to see them graphed.")),
                                tabItem(tabName = "earn",h2("Current Earnings of Stocks"),
-                                       dateInput("start_invest", "Select Start Date", value = "2000-01-01"),
-                                       dateInput("end_invest", "Select End Date"),
-                                       selectInput("stockname","Choose One Stock", choices = names(table(SYMBOL$Name)), selected = names(table(SYMBOL$Name))[789]),
-                                       selectInput("stockname2","Choose Another Stock", choices = names(table(SYMBOL$Name)), selected = names(table(SYMBOL$Name))[789]),
-                                       selectInput("initial","Choose Amount of Stocks", choices = 1:1000),
-                                       selectInput("initial2","Choose Amount of Stocks", choices = 1:1000),
+                                       dateInput("start_invest_multi", "Select Start Date", value = "2000-01-01"),
+                                       dateInput("end_invest_multi", "Select End Date"),
+                                       selectInput("stockname1multi","Choose One Stock", choices = names(table(SYMBOL$Name)), selected = names(table(SYMBOL$Name))[789]),
+                                       selectInput("stockname2multi","Choose Another Stock", choices = names(table(SYMBOL$Name)), selected = names(table(SYMBOL$Name))[789]),
+                                       selectInput("initial1multi","Choose Amount of Stocks", choices = 1:1000),
+                                       selectInput("initial2multi","Choose Amount of Stocks", choices = 1:1000),
                                        submitButton(),
                                        verbatimTextOutput("money2"))))
 
@@ -98,10 +98,10 @@ server <- function(input, output) {
   })
   
   output$money2 <- renderPrint({
-    start_invest <- input$start_invest
-    end_invest <- input$end_invest
-    TICK <- SYMBOL$Symbol[which(SYMBOL$Name == input$stockname)]
-    TICK2 <- SYMBOL$Symbol[which(SYMBOL$Name == input$stockname2)]
+    start_invest <- input$start_invest_multi
+    end_invest <- input$end_invest_multi
+    TICK <- SYMBOL$Symbol[which(SYMBOL$Name == input$stockname1multi)]
+    TICK2 <- SYMBOL$Symbol[which(SYMBOL$Name == input$stockname2multi)]
     STOCK <- getSymbols(TICK, src = "yahoo", from = start_invest, to = end_invest, auto.assign = FALSE)
     STOCK2 <- getSymbols(TICK2, src = "yahoo", from = start_invest, to = end_invest, auto.assign = FALSE)
     start_price <- STOCK[1,4]
@@ -116,8 +116,8 @@ server <- function(input, output) {
     change2 <- end_price2 - start_price2
     percent_change <- change/start_price
     percent_change2 <- change2/start_price2
-    end_money <- as.numeric(input$initial) * (1+percent_change)
-    end_money2 <- as.numeric(input$initial2) * (1+percent_change2)
+    end_money <- as.numeric(input$initial1multi) * (1+percent_change)
+    end_money2 <- as.numeric(input$initial2multi) * (1+percent_change2)
     total <- sum(end_money + end_money2)
     total
   })
