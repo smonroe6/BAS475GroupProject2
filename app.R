@@ -18,6 +18,7 @@ library(plotly)
 library(ggpubr)
 library(tidyquant)
 library(TTR)
+library(scales)
 
 SYMBOL <- stockSymbols()
 
@@ -50,17 +51,17 @@ body <- dashboardBody(tabItems(tabItem(tabName = "stock",h2("Select a stock.
                                        selectInput("stockname","Choose One Stock", choices = names(table(SYMBOL$Name)), selected = names(table(SYMBOL$Name))[789]),
                                        selectInput("initial","Choose Amount", choices = 1:1000),
                                        submitButton(),
-                                       verbatimTextOutput("money")),
+                                       textOutput("money")),
                                tabItem(tabName = "MultiplePlot",h2("Select a date range and multiple stocks to see them graphed.")),
                                tabItem(tabName = "earn",h2("Current Earnings of Stocks"),
                                        dateInput("start_invest_multi", "Select Start Date", value = "2000-01-01"),
                                        dateInput("end_invest_multi", "Select End Date"),
-                                       selectInput("stockname1multi","Choose One Stock", choices = names(table(SYMBOL$Name)), selected = names(table(SYMBOL$Name))[789]),
-                                       selectInput("stockname2multi","Choose Another Stock", choices = names(table(SYMBOL$Name)), selected = names(table(SYMBOL$Name))[789]),
-                                       selectInput("initial1multi","Choose Amount of Stocks", choices = 1:1000),
-                                       selectInput("initial2multi","Choose Amount of Stocks", choices = 1:1000),
+                                       selectInput("stockname1multi","Choose Stock 1", choices = names(table(SYMBOL$Name)), selected = names(table(SYMBOL$Name))[789]),
+                                       selectInput("stockname2multi","Choose Stock 2", choices = names(table(SYMBOL$Name)), selected = names(table(SYMBOL$Name))[789]),
+                                       selectInput("initial1multi","Choose Amount of Stock 1", choices = 1:1000),
+                                       selectInput("initial2multi","Choose Amount of Stock 2", choices = 1:1000),
                                        submitButton(),
-                                       verbatimTextOutput("money2"))))
+                                       textOutput("money2"))))
 
 ui <- fluidPage(
   dashboardPage(
@@ -82,7 +83,7 @@ server <- function(input, output) {
     
   })
   
-  output$money <- renderPrint({
+  output$money <- renderText({
     start_invest <- input$start_invest
     end_invest <- input$end_invest
     TICK <- SYMBOL$Symbol[which(SYMBOL$Name == input$stockname)]
@@ -94,10 +95,10 @@ server <- function(input, output) {
     change <- end_price - start_price
     percent_change <- change/start_price
     end_money <- as.numeric(input$initial) * (1+percent_change)
-    end_money
+    paste("Potential Money Made is " , dollar(end_money))
   })
   
-  output$money2 <- renderPrint({
+  output$money2 <- renderText({
     start_invest <- input$start_invest_multi
     end_invest <- input$end_invest_multi
     TICK <- SYMBOL$Symbol[which(SYMBOL$Name == input$stockname1multi)]
@@ -119,7 +120,7 @@ server <- function(input, output) {
     end_money <- as.numeric(input$initial1multi) * (1+percent_change)
     end_money2 <- as.numeric(input$initial2multi) * (1+percent_change2)
     total <- sum(end_money + end_money2)
-    total
+    paste("Current Earnings of Stock is ",dollar(total))
   })
 }
 
