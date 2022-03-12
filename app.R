@@ -41,8 +41,7 @@ sidebar <- dashboardSidebar(sidebarMenu(
 
 body <- dashboardBody(tabItems(
   tabItem(
-    tabName = "stock", h2("Select a stock.
-                                                            Will show the period you select or the time the stock was traded."),
+    tabName = "stock", h2("Select a stock. It will show the period you select or the time the stock was traded."),
     dateInput("start_date", "Select Start Date", value = "2000-01-01"),
     dateInput("end_date", "Select End Date"),
     selectInput("sname", "Choose One Stock", choices = names(table(SYMBOL$Name)), selected = names(table(SYMBOL$Name))[789]),
@@ -59,14 +58,16 @@ body <- dashboardBody(tabItems(
     textOutput("money")
   ),
   tabItem(
-    tabName = "MultiplePlot", h2("Select a date range and multiple stocks to see them graphed."),
+    tabName = "MultiplePlot", h2("Select a date range and multiple stocks to see them graphed.
+                                 You will also be told which had a greater percent change"),
     dateInput("start_invest_multi2", "Select Start Date", value = "2000-01-01"),
     dateInput("end_invest_multi2", "Select End Date"),
     selectInput("stocknamecomp1", "Choose Stock 1", choices = names(table(SYMBOL$Name)), selected = names(table(SYMBOL$Name))[789]),
-    plotlyOutput("stonk"),
     selectInput("stocknamecomp2", "Choose Stock 2", choices = names(table(SYMBOL$Name)), selected = names(table(SYMBOL$Name))[789]),
+    submitButton(),
+    plotlyOutput("stonk"),
     plotlyOutput("stonk2"),
-    submitButton()
+    textOutput("greater")
   ),
   tabItem(
     tabName = "earn", h2("Current Earnings of Stocks"),
@@ -74,8 +75,8 @@ body <- dashboardBody(tabItems(
     dateInput("end_invest_multi", "Select End Date"),
     selectInput("stockname1multi", "Choose Stock 1", choices = names(table(SYMBOL$Name)), selected = names(table(SYMBOL$Name))[789]),
     selectInput("stockname2multi", "Choose Stock 2", choices = names(table(SYMBOL$Name)), selected = names(table(SYMBOL$Name))[789]),
-    selectInput("initial1multi", "Choose Amount of Stock 1", choices = 1:1000),
-    selectInput("initial2multi", "Choose Amount of Stock 2", choices = 1:1000),
+    selectInput("initial1multi", "Choose Dollar Amount of Stock 1", choices = 1:1000),
+    selectInput("initial2multi", "Choose Dollar Amount of Stock 2", choices = 1:1000),
     submitButton(),
     textOutput("money2")
   )
@@ -160,6 +161,36 @@ server <- function(input, output) {
       SYMBOL$Symbol[which(SYMBOL$Name == input$stocknamecomp2)],
       "Stock Price"
     ), y = "Price in USD", x = "Date")
+  })
+  
+  output$greater <- renderText({
+    start_invest <- input$start_invest_multi2
+    end_invest <- input$end_invest_multi2
+    TICKS1 <- SYMBOL$Symbol[which(SYMBOL$Name == input$stocknamecomp1)]
+    STOCKS1 <- getSymbols(TICKS1, src = "yahoo", from = start_invest, to = end_invest, auto.assign = FALSE)
+    TICKS2 <- SYMBOL$Symbol[which(SYMBOL$Name == input$stocknamecomp2)]
+    STOCKS2 <- getSymbols(TICKS2, src = "yahoo", from = start_invest, to = end_invest, auto.assign = FALSE)
+    start_price_greater <- STOCKS1[1, 4]
+    start_price_greater2 <- STOCKS2[1, 4]
+    start_price_greater <- as.numeric(start_price_greater)
+    start_price_greater2 <- as.numeric(start_price_greater2)
+    end_price_greater <- tail(STOCKS1, 1)[, 4]
+    end_price_greater2 <- tail(STOCKS2, 1)[, 4]
+    end_price <- as.numeric(end_price_greater)
+    end_price2 <- as.numeric(end_price_greater2)
+    change_greater <- end_price_greater - start_price_greater
+    change_greater2 <- end_price_greater2 - start_price_greater2
+    percent_change_greater <- change_greater / start_price_greater
+    percent_change_greater2 <- change_greater2 / start_price_greater2
+    if (percent_change_greater > percent_change_greater2){
+      paste(SYMBOL$Symbol[which(SYMBOL$Name == input$stocknamecomp1)], "had the greater percent change.")
+    }
+    else if (percent_change_greater < percent_change_greater2){
+      paste(SYMBOL$Symbol[which(SYMBOL$Name == input$stocknamecomp2)], "had the greater percent change.")
+    }
+    else {
+      paste("The stocks' percent change was the same.")
+    }
   })
 }
 
